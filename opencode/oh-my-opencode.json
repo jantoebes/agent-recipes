@@ -1,7 +1,10 @@
 {
-  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
   "agents": {
     "sisyphus": {
+      "model": "github-copilot/claude-opus-4.6"
+    },
+    "hephaestus": {
       "model": "github-copilot/claude-opus-4.6"
     },
     "oracle": {
@@ -24,6 +27,9 @@
     },
     "atlas": {
       "model": "github-copilot/claude-sonnet-4.5"
+    },
+    "momus": {
+      "model": "github-copilot/claude-opus-4.6"
     }
   },
   "categories": {
@@ -32,6 +38,12 @@
     },
     "ultrabrain": {
       "model": "github-copilot/claude-opus-4.6"
+    },
+    "deep": {
+      "model": "github-copilot/claude-opus-4.6"
+    },
+    "artistry": {
+      "model": "github-copilot/claude-sonnet-4.5"
     },
     "quick": {
       "model": "github-copilot/claude-haiku-4.5"
@@ -54,5 +66,9 @@
   "background_task": {
     "defaultConcurrency": 3,
     "staleTimeoutMs": 180000
+  },
+  "experimental": {
+    "aggressive_truncation": true,
+    "task_system": true
   }
 }
