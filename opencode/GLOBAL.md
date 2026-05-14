@@ -33,4 +33,3 @@ Wanneer je in een frontend codebase werkt met typescript
 
 ## Kotlin
 - Gebruik nooit `!!` om types te onderdrukken
-- Wanneer je in een backend codebase werkt, volg het recipe in `rules/kotlin-spring-backend.md`.

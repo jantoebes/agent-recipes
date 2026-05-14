@@ -26,10 +26,68 @@ Cross-cutting concerns (config, security, DB-setup) in een `shared/` package.
 - `data class` voor records en modellen
 - `object` voor pure utilities en mappers
 - Geen inheritance in de domeinlaag
+- Geen `as` casts — gebruik `is` smart casts, `when`-exhaustiveness of generics
 
 **Arrow foutafhandeling:**
-- Gebruik `either { }`, `nullable { }`, `option { }` met `.bind()`
-- Geen eager returns
+
+Log op de plek waar de fout ontstaat. `Either` alleen om "stop" door een pipeline te dragen — niet als container voor logging-metadata. Geen `<Service>Error`-hiërarchie tenzij de aanroepkant per type een ander pad kiest (retry, HTTP status, log-level).
+
+Patronen:
+```kotlin
+// either {} met .bind(), ensureNotNull() en raise()
+either {
+    val item = ensureNotNull(repo.findById(id)) {
+        logger.error { "Item $id niet gevonden" }  // Log bij oorsprong
+        SkipMarker
+    }
+    ensure(item.isValid) { ValidationError("...") }
+    process(item)
+}
+
+// Either.catch met .onLeft logging
+Either
+    .catch { externalCall() }
+    .onLeft { e -> logger.error(e) { "Call mislukt voor $id" } }
+
+// either met .fold voor vertakking
+either<ErrorType, Result> { compute() }
+    .fold(
+        ifLeft = { error -> logger.error { "Fout: $error" }; fallback(error) },
+        ifRight = { it },
+    )
+
+// nullable {} voor optionele ketens
+nullable {
+    val a = source.fieldA.bind()
+    val b = source.fieldB.bind()
+    Combined(a, b)
+}
+
+// option {} met .getOrNull() fallback
+option {
+    val enriched = repo.findExtra(id).bind()
+    original.copy(extra = enriched)
+}.getOrNull() ?: original
+```
+
+Regels:
+- Geen eager returns binnen Arrow-contexten
+- `ensureNotNull()` boven `?: raise()`
+- Sealed class errors alleen als de aanroepkant per type een ander pad kiest
+- Skip-markers als `private data object Skip`
+
+Sealed class errors (alleen als nodig):
+```kotlin
+sealed class CalculationError {
+    data class ApiFailure(val code: String, val message: String) : CalculationError()
+    data class Unexpected(val message: String) : CalculationError()
+}
+
+fun Throwable.toCalculationError(): CalculationError = when (this) {
+    is SpecificException -> CalculationError.ApiFailure(code, message)
+    else -> CalculationError.Unexpected(message ?: "Unknown error")
+}
+```
 
 **Transactiescoping via context receivers:**
 

@@ -1,7 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    "/Users/jan/Development/github/jantoebes/agent-recipes/global.md"
+    "/Users/jan/Development/github/jantoebes/agent-recipes/opencode/GLOBAL.md",
+    "/Users/jan/.config/opencode/rules/kotlin-spring-backend.md"
   ],
   "plugin": ["@franlol/opencode-md-table-formatter@0.0.2"],
   "disabled_providers": ["anthropic"],
