@@ -16,46 +16,39 @@ feature/
 └── model/       — Domeinmodellen
 ```
 
-Alle subfolders zijn optioneel — alleen aanmaken wat de feature nodig heeft.
-
-Cross-cutting concerns (config, security, DB-setup) in een `shared/` package.
+Subfolders optioneel; cross-cutting concerns (config, security, DB-setup) in `shared/`.
 
 ## Code
 
-**Domeinmodellen:**
-- `data class` voor records en modellen
-- `object` voor pure utilities en mappers
-- Geen inheritance in de domeinlaag
+Algemene Kotlin-regels:
+- Gebruik nooit `!!` om types te onderdrukken
 - Geen `as` casts — gebruik `is` smart casts, `when`-exhaustiveness of generics
 - Geen `@Suppress("UNCHECKED_CAST")` — los de oorzaak op met generics of type-safe alternatieven
 
+**Domeinmodellen:**
+- `data class` voor records en modellen
+- `object` voor pure utilities
+- Geen inheritance in de domeinlaag
+
 **Arrow foutafhandeling:**
 
-Log op de plek waar de fout ontstaat. `Either` alleen om "stop" door een pipeline te dragen — niet als container voor logging-metadata. Geen `<Service>Error`-hiërarchie tenzij de aanroepkant per type een ander pad kiest (retry, HTTP status, log-level).
+Log bij oorsprong. `Either` alleen om "stop" door pipeline te dragen. Geen error-hiërarchie tenzij aanroepkant per type ander pad kiest (retry, HTTP status, log-level).
 
-Patronen:
 ```kotlin
 // either {} met .bind(), ensureNotNull() en raise()
 either {
-    val item = ensureNotNull(repo.findById(id)) {
-        logger.error { "Item $id niet gevonden" }  // Log bij oorsprong
-        SkipMarker
-    }
+    val item = ensureNotNull(repo.findById(id)) { logger.error { "Item $id niet gevonden" }; SkipMarker }
     ensure(item.isValid) { ValidationError("...") }
     process(item)
 }
 
 // Either.catch met .onLeft logging
-Either
-    .catch { externalCall() }
+Either.catch { externalCall() }
     .onLeft { e -> logger.error(e) { "Call mislukt voor $id" } }
 
 // either met .fold voor vertakking
 either<ErrorType, Result> { compute() }
-    .fold(
-        ifLeft = { error -> logger.error { "Fout: $error" }; fallback(error) },
-        ifRight = { it },
-    )
+    .fold(ifLeft = { fallback(it) }, ifRight = { it })
 
 // nullable {} voor optionele ketens
 nullable {
@@ -65,34 +58,17 @@ nullable {
 }
 
 // option {} met .getOrNull() fallback
-option {
-    val enriched = repo.findExtra(id).bind()
-    original.copy(extra = enriched)
-}.getOrNull() ?: original
+option { original.copy(extra = repo.findExtra(id).bind()) }.getOrNull() ?: original
 ```
 
 Regels:
-- Geen eager returns binnen Arrow-contexten
 - `ensureNotNull()` boven `?: raise()`
 - Sealed class errors alleen als de aanroepkant per type een ander pad kiest
 - Skip-markers als `private data object Skip`
 
-Sealed class errors (alleen als nodig):
-```kotlin
-sealed class CalculationError {
-    data class ApiFailure(val code: String, val message: String) : CalculationError()
-    data class Unexpected(val message: String) : CalculationError()
-}
-
-fun Throwable.toCalculationError(): CalculationError = when (this) {
-    is SpecificException -> CalculationError.ApiFailure(code, message)
-    else -> CalculationError.Unexpected(message ?: "Unknown error")
-}
-```
-
 **Transactiescoping via context receivers:**
 
-Repo-methoden declareren hun vereiste scope als context receiver — de compiler dwingt af dat ze alleen binnen de juiste transactie aangeroepen worden:
+Repo-methoden declareren scope als context receiver; services openen blok via `tx.write {}` of `tx.read {}`:
 
 ```kotlin
 @Repository
@@ -102,21 +78,6 @@ open class CourierTripRepo(private val jdbi: Jdbi) {
 
     context(_: DbReadScope)
     fun findByTripUuid(id: UUID): CourierTripRec? { ... }
-}
-```
-
-Services injecteren `TransactionScope` en openen een blok via `tx.write { }` of `tx.read { }`:
-
-```kotlin
-@Service
-open class CourierPipelineService(
-    private val repo: CourierTripRepo,
-    private val tx: TransactionScope,
-) {
-    open fun handle(event: TripStart) =
-        tx.write {
-            repo.upsert(TripStartToRecMapper.map(event))
-        }
 }
 ```
 
@@ -133,6 +94,11 @@ InputMapper.map(input)
 ```
 
 ## Testen
+
+Voor het uitvoeren van integratietests:
+1. `docker kill $(docker ps -q); docker rm $(docker ps -a -q)` — stop en verwijder alle draaiende containers
+2. `docker compose up -d` in de repo-root — start de benodigde infrastructuur
+3. Daarna de integratietests uitvoeren
 
 - Vrijwel uitsluitend integratietests — geen mocks, echte Spring-context + infrastructuur
 - `ItTestBase` reset DB voor elke test via Flyway + wipe (`@BeforeEach`)

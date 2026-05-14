@@ -22,14 +22,11 @@
 - Voor opschonen gebruik het commando /cleanup-worktrees
 
 ## Code
-Wanneer je in codebases werkt
 - Altijd functioneel programmeren style
 - Cleancode principes
-- Kleine, enkelvoudige functies met beschrijvende namen (DRY, geen onnodige commentaar)
+- Kleine, enkelvoudige functies met beschrijvende namen (DRY)
+- Geen commentaar in code — de code spreekt voor zichzelf
+- Geen early returns
 
-## Frontend
-Wanneer je in een frontend codebase werkt met typescript
+## Frontend (TypeScript)
 - Gebruik nooit `!` om types te onderdrukken
-
-## Kotlin
-- Gebruik nooit `!!` om types te onderdrukken
