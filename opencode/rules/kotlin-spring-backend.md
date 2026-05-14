@@ -27,6 +27,7 @@ Cross-cutting concerns (config, security, DB-setup) in een `shared/` package.
 - `object` voor pure utilities en mappers
 - Geen inheritance in de domeinlaag
 - Geen `as` casts — gebruik `is` smart casts, `when`-exhaustiveness of generics
+- Geen `@Suppress("UNCHECKED_CAST")` — los de oorzaak op met generics of type-safe alternatieven
 
 **Arrow foutafhandeling:**
 
