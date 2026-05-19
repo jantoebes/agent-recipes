@@ -25,6 +25,9 @@ Algemene Kotlin-regels:
 - Geen `as` casts — gebruik `is` smart casts, `when`-exhaustiveness of generics
 - Geen `@Suppress("UNCHECKED_CAST")` — los de oorzaak op met generics of type-safe alternatieven
 
+**Database:**
+- Geen `DEFAULT` in Flyway-migraties voor waarden die de backend kan bepalen (bijv. `now()`, UUIDs)
+
 **Domeinmodellen:**
 - `data class` voor records en modellen
 - `object` voor pure utilities
