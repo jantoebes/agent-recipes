@@ -15,11 +15,12 @@
 - Geen PR beschrijving
 - Gebruik nooit force push
 
-## Worktrees
-- Gebruik altijd de `wt` tool (via Bash) — nooit `git worktree` handmatig
-- Aanmaken: `wt switch --create <branch> --base <base>`
-- Navigeren: `wt switch <branch>`
-- Voor opschonen gebruik het commando /cleanup-worktrees
+## Branches & Worktrees
+- Vraag de gebruiker bij het starten van een taak (alleen als je op main zit): worktree, gewone branch, of direct op main?
+- Gewone branch: `git checkout -b <branch>`
+- Worktree: `wt switch --create <branch> --base <base>` — nooit `git worktree` handmatig
+- Navigeren worktrees: `wt switch <branch>`
+- Voor opschonen worktrees: `/cleanup-worktrees`
 
 ## Code
 - Altijd functioneel programmeren style
