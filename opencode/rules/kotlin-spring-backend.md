@@ -110,5 +110,6 @@ Voor het uitvoeren van integratietests:
 - Gelaagd: `SamplePrimitives` → `SampleXxxRec` → `SampleXxx` (domein) → `SampleKafka`
 - Primitieve constanten: `const val UPPER_SNAKE_CASE`; complexe objecten: `val sampleXxx` (camelCase)
 - Varianten via extra `val` of `.copy()`, geen methoden tenzij parametrisatie echt nodig is
-- Assertions met `usingRecursiveComparison().ignoringFields(...)` voor flexibele record-vergelijking
+- Eén `assertThat` per object — geen losse `assertThat` per veld. Vergelijk via `assertThat(obj).isEqualTo(sample.copy(...))`. Voor dynamische velden (id, timestamp): kopieer ze terug in het expected object via `.copy()`. Gebruik `usingRecursiveComparison()` alleen als `.copy()` niet volstaat (bijv. geneste objecten met dynamische velden). Geen `ignoringFields`.
+- Geen `Thread.sleep` — gebruik Awaitility voor async assertions
 - Unit tests alleen voor pure berekeningen (bijv. `HaversineCalculatorTest`)
