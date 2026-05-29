@@ -85,6 +85,7 @@ open class CourierTripRepo(private val jdbi: Jdbi) {
 ```
 
 **Mappie mappers:**
+- Mappie is de standaard keuze voor alle object-naar-object mappings, inclusief van/naar Avro-generated classes
 - Mappers als `object` die `ObjectMappie<From, To>` extenden
 - Declaratief met `mapping { }` syntax
 - Properties met dezelfde naam in source en target worden niet in code opgenomen (automapping)
