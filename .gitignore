@@ -1,3 +1,8 @@
 .idea/
 .DS_Store
 opencode/opencode.json
+opencode/opencode.properties
+opencode/package-lock.json
+opencode/bun.lock
+opencode/node_modules/
+opencode/package.json
