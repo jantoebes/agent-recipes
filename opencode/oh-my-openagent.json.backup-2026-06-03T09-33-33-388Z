@@ -1,0 +1,74 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
+  "agents": {
+    "sisyphus": {
+      "model": "github-copilot/claude-opus-4.7"
+    },
+    "hephaestus": {
+      "model": "github-copilot/gpt-5.5"
+    },
+    "oracle": {
+      "model": "github-copilot/gpt-5.5"
+    },
+    "librarian": {
+      "model": "github-copilot/grok-code-fast-1"
+    },
+    "explore": {
+      "model": "github-copilot/grok-code-fast-1"
+    },
+    "multimodal-looker": {
+      "model": "github-copilot/gpt-5.5"
+    },
+    "prometheus": {
+      "model": "github-copilot/claude-opus-4.7"
+    },
+    "metis": {
+      "model": "github-copilot/claude-sonnet-4.6"
+    },
+    "atlas": {
+      "model": "github-copilot/claude-sonnet-4.6"
+    },
+    "momus": {
+      "model": "github-copilot/gpt-5.5"
+    }
+  },
+  "categories": {
+    "visual-engineering": {
+      "model": "github-copilot/gemini-3.1-pro"
+    },
+    "ultrabrain": {
+      "model": "github-copilot/gpt-5.5"
+    },
+    "deep": {
+      "model": "github-copilot/gpt-5.5"
+    },
+    "artistry": {
+      "model": "github-copilot/claude-sonnet-4.6"
+    },
+    "quick": {
+      "model": "github-copilot/claude-haiku-4.5"
+    },
+    "unspecified-low": {
+      "model": "github-copilot/claude-sonnet-4.6"
+    },
+    "unspecified-high": {
+      "model": "github-copilot/claude-opus-4.7"
+    },
+    "writing": {
+      "model": "github-copilot/claude-sonnet-4.6"
+    }
+  },
+  "sisyphus_agent": {
+    "disabled": false,
+    "planner_enabled": true,
+    "replace_plan": true
+  },
+  "background_task": {
+    "defaultConcurrency": 3,
+    "staleTimeoutMs": 180000
+  },
+  "experimental": {
+    "aggressive_truncation": true,
+    "task_system": true
+  }
+}
