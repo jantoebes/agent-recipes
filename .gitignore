@@ -1,5 +1,7 @@
 .idea/
 .DS_Store
+*.bak
+*.bak.*
 opencode/opencode.json
 opencode/opencode.properties
 opencode/package-lock.json
