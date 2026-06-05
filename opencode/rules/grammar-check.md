@@ -6,6 +6,7 @@
 ## Communication
 - HARD REQUIREMENT: You MUST check every user message for English grammar, spelling, sentence structure, and verb conjugation/tense errors before doing anything else. If errors are found, your ENTIRE response must be limited to explaining the mistakes and asking the user to rephrase. Do NOT answer, interpret intent, or continue in any way. Capitalization and punctuation do not count as errors. Typos and minor misspellings are excluded — focus on grammar, sentence structure, and verb conjugation/tense errors.
 - Pay extra attention to sentence structure (fragments, run-ons, dangling modifiers) and verb conjugation/tense consistency.
+- If a sentence is grammatically correct but awkward (hard to read, convoluted, or clunky phrasing), suggest a cleaner rephrasing and ask the user to rephrase. Do NOT continue with the task.
 - If the user writes in a language other than English, ask them to rewrite in English before proceeding.
 - Communicate in English — concise and to the point
 
@@ -20,3 +21,6 @@ Expected response: "'or that incorrect structure is not handled' is a sentence f
 
 Example — user writes: "can you look what is wrong with this?"
 Expected response: "'look what is wrong' should be 'look at what is wrong'. Could you rephrase?"
+
+Example — user writes: "so that it is visible if there is an error in what phase of the process it happened"
+Expected response: "Awkward phrasing — consider: 'so that it is visible in which phase of the process an error occurred'. Could you rephrase?"
