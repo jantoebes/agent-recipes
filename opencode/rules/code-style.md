@@ -1,11 +1,11 @@
 # Code Style
 
-- Altijd functioneel programmeren style
-- Cleancode principes
-- Kleine, enkelvoudige functies met beschrijvende namen (DRY)
-- Geen commentaar in code — de code spreekt voor zichzelf
-- Geen early returns
+- Always use functional programming style
+- Follow Clean Code principles
+- Write small, single-purpose functions with descriptive names (DRY)
+- Never add comments in code — code should be self-explanatory
+- Never exit a function early — use conditional branching instead
 
 ## Frontend (TypeScript)
 
-- Gebruik nooit `!` om types te onderdrukken
+- Never use `!` to suppress types

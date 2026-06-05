@@ -1,4 +1,4 @@
 # AGENTS.md
 
-- Houd elk AGENTS.md zo compact mogelijk — elke instructie moet aantoonbaar gedrag sturen
-- Houd AGENTS.md actief relevant: stel een update voor als iets ontbreekt of verouderd is; comprimeer voor je toevoegt
+- Keep every AGENTS.md as compact as possible — every instruction must demonstrably drive behavior
+- Keep AGENTS.md actively relevant: propose an update when something is missing or outdated; compress before adding

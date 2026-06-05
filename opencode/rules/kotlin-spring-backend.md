@@ -1,77 +1,78 @@
 # Kotlin Spring Boot Backend — Recipe
 
-## Mappenstructuur
-Feature-based packaging. Elke feature is een top-level subpackage met interne lagen:
+## Package Structure
+
+Use feature-based packaging. Each feature is a top-level subpackage with internal layers:
 
 ```
 feature/
 ├── consumer/    — Kafka consumers
 ├── producer/    — Kafka producers
-├── service/     — Bedrijfslogica
+├── service/     — Business logic
 ├── mapper/      — Mappie mappers
 ├── controller/  — REST endpoints
 ├── repo/
 │   ├── rec/     — Database records (data classes)
-│   └── table/   — Tabelobjecten (naam + kolomconstanten)
-└── model/       — Domeinmodellen
+│   └── table/   — Table objects (name + column constants)
+└── model/       — Domain models
 ```
 
-Subfolders optioneel; cross-cutting concerns (config, security, DB-setup) in `shared/`.
+Subfolders are optional; put cross-cutting concerns (config, security, DB setup) in `shared/`.
 
 ## Code
 
-Algemene Kotlin-regels:
-- Gebruik nooit `!!` om types te onderdrukken
-- Geen `as` casts — gebruik `is` smart casts, `when`-exhaustiveness of generics
-- Geen `@Suppress("UNCHECKED_CAST")` — los de oorzaak op met generics of type-safe alternatieven
+General Kotlin rules:
+- Never use `!!` to suppress types
+- Never use `as` casts — use `is` smart casts, `when` exhaustiveness, or generics
+- Never use `@Suppress("UNCHECKED_CAST")` — fix the root cause with generics or type-safe alternatives
 
 **Database:**
-- Geen `DEFAULT` in Flyway-migraties voor waarden die de backend kan bepalen (bijv. `now()`, UUIDs)
+- Never use `DEFAULT` in Flyway migrations for values the backend can determine (e.g. `now()`, UUIDs)
 
-**Domeinmodellen:**
-- `data class` voor records en modellen
-- `object` voor pure utilities
-- Geen inheritance in de domeinlaag
+**Domain models:**
+- Use `data class` for records and models
+- Use `object` for pure utilities
+- No inheritance in the domain layer
 
-**Arrow foutafhandeling:**
+**Arrow error handling:**
 
-Log bij oorsprong. `Either` alleen om "stop" door pipeline te dragen. Geen error-hiërarchie tenzij aanroepkant per type ander pad kiest (retry, HTTP status, log-level).
+Log at the origin. Use `Either` only to carry "stop" through a pipeline. No error hierarchy unless the call site needs a different path per type (retry, HTTP status, log level).
 
 ```kotlin
-// either {} met .bind(), ensureNotNull() en raise()
+// either {} with .bind(), ensureNotNull() and raise()
 either {
-    val item = ensureNotNull(repo.findById(id)) { logger.error { "Item $id niet gevonden" }; SkipMarker }
+    val item = ensureNotNull(repo.findById(id)) { logger.error { "Item $id not found" }; SkipMarker }
     ensure(item.isValid) { ValidationError("...") }
     process(item)
 }
 
-// Either.catch met .onLeft logging
+// Either.catch with .onLeft logging
 Either.catch { externalCall() }
-    .onLeft { e -> logger.error(e) { "Call mislukt voor $id" } }
+    .onLeft { e -> logger.error(e) { "Call failed for $id" } }
 
-// either met .fold voor vertakking
+// either with .fold for branching
 either<ErrorType, Result> { compute() }
     .fold(ifLeft = { fallback(it) }, ifRight = { it })
 
-// nullable {} voor optionele ketens
+// nullable {} for optional chains
 nullable {
     val a = source.fieldA.bind()
     val b = source.fieldB.bind()
     Combined(a, b)
 }
 
-// option {} met .getOrNull() fallback
+// option {} with .getOrNull() fallback
 option { original.copy(extra = repo.findExtra(id).bind()) }.getOrNull() ?: original
 ```
 
-Regels:
-- `ensureNotNull()` boven `?: raise()`
-- Sealed class errors alleen als de aanroepkant per type een ander pad kiest
-- Skip-markers als `private data object Skip`
+Rules:
+- Prefer `ensureNotNull()` over `?: raise()`
+- Use sealed class errors only when the call site needs a different path per type
+- Define skip markers as `private data object Skip`
 
-**Transactiescoping via context receivers:**
+**Transaction scoping via context receivers:**
 
-Repo-methoden declareren scope als context receiver; services openen blok via `tx.write {}` of `tx.read {}`:
+Repo methods declare scope as a context receiver; services open a block via `tx.write {}` or `tx.read {}`:
 
 ```kotlin
 @Repository
@@ -85,32 +86,32 @@ open class CourierTripRepo(private val jdbi: Jdbi) {
 ```
 
 **Mappie mappers:**
-- Mappie is de standaard keuze voor alle object-naar-object mappings, inclusief van/naar Avro-generated classes
-- Mappers als `object` die `ObjectMappie<From, To>` extenden
-- Declaratief met `mapping { }` syntax
-- Properties met dezelfde naam in source en target worden niet in code opgenomen (automapping)
+- Use Mappie for all object-to-object mappings, including to/from Avro-generated classes
+- Define mappers as `object` extending `ObjectMappie<From, To>`
+- Use declarative `mapping { }` syntax
+- Properties with the same name in source and target do not need to be mapped explicitly (automapping)
 
-**Pipeline-stijl:**
+**Pipeline style:**
 ```kotlin
 InputMapper.map(input)
     .also { repo.upsert(it) }
     .let(OutputMapper::map)
 ```
 
-## Testen
+## Testing
 
-Voor het uitvoeren van integratietests:
-1. `docker kill $(docker ps -q); docker rm $(docker ps -a -q)` — stop en verwijder alle draaiende containers
-2. `docker compose up -d` in de repo-root — start de benodigde infrastructuur
-3. Daarna de integratietests uitvoeren
+To run integration tests:
+1. `docker kill $(docker ps -q); docker rm $(docker ps -a -q)` — stop and remove all running containers
+2. `docker compose up -d` in the repo root — start the required infrastructure
+3. Then run the integration tests
 
-- Vrijwel uitsluitend integratietests — geen mocks, echte Spring-context + infrastructuur
-- `ItTestBase` reset DB voor elke test via Flyway + wipe (`@BeforeEach`)
-- `ItWaiter` (Awaitility-wrapper) voor async assertions op repo-niveau na Kafka-verwerking
-- Sample-objecten als top-level `object` in `src/test/kotlin/.../it/samples/` — nooit `class`, geen builders
-- Gelaagd: `SamplePrimitives` → `SampleXxxRec` → `SampleXxx` (domein) → `SampleKafka`
-- Primitieve constanten: `const val UPPER_SNAKE_CASE`; complexe objecten: `val sampleXxx` (camelCase)
-- Varianten via extra `val` of `.copy()`, geen methoden tenzij parametrisatie echt nodig is
-- Eén `assertThat` per object — geen losse `assertThat` per veld. Vergelijk via `assertThat(obj).isEqualTo(sample.copy(...))`. Voor dynamische velden (id, timestamp): kopieer ze terug in het expected object via `.copy()`. Gebruik `usingRecursiveComparison()` alleen als `.copy()` niet volstaat (bijv. geneste objecten met dynamische velden). Geen `ignoringFields`.
-- Geen `Thread.sleep` — gebruik Awaitility voor async assertions
-- Unit tests alleen voor pure berekeningen (bijv. `HaversineCalculatorTest`)
+- Use almost exclusively integration tests — no mocks, real Spring context + infrastructure
+- `ItTestBase` resets the DB before each test via Flyway + wipe (`@BeforeEach`)
+- `ItWaiter` (Awaitility wrapper) for async assertions at repo level after Kafka processing
+- Define sample objects as top-level `object` in `src/test/kotlin/.../it/samples/` — never `class`, no builders
+- Layer them: `SamplePrimitives` → `SampleXxxRec` → `SampleXxx` (domain) → `SampleKafka`
+- Primitive constants: `const val UPPER_SNAKE_CASE`; complex objects: `val sampleXxx` (camelCase)
+- Use extra `val` or `.copy()` for variants, no methods unless parameterization is truly necessary
+- Use one `assertThat` per object — no individual `assertThat` per field. Compare with `assertThat(obj).isEqualTo(sample.copy(...))`. For dynamic fields (id, timestamp): copy them back into the expected object via `.copy()`. Use `usingRecursiveComparison()` only when `.copy()` is insufficient (e.g. nested objects with dynamic fields). Never use `ignoringFields`.
+- Never use `Thread.sleep` — use Awaitility for async assertions
+- Only use unit tests for pure calculations (e.g. `HaversineCalculatorTest`)
